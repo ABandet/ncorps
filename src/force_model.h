@@ -9,7 +9,7 @@ namespace ncorps {
 
 class ForceModel {
   public:
-    ForceModel() = default;
+    ForceModel() = delete;
 
     static void step(Bodies &b, const size_t i, const double dt, double &fx,
                      double &fy, double &fz) {
