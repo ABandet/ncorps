@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-#include "bodies.h"
+#include "datatype/bodies.hpp"
 
 namespace ncorps {
 
