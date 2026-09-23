@@ -1,7 +1,9 @@
 #include <chrono>
 #include <cmath>
+#include <concepts>
 #include <cstddef>
 #include <iostream>
+#include <utility>
 #include <vector>
 
 #include "api/concepts.hpp"
@@ -47,52 +49,54 @@ void run_omp(Bodies &b, double dt, int nb_iter) {
     }
 }
 
-int main(void) {
+struct BenchResult {
+    std::chrono::milliseconds duration;
+    double energy_diff;
+};
 
-    std::cout << "Running simulation on " << NB_ITER << " time iteration"
-              << std::endl;
-    std::cout << "With " << N << " bodies" << std::endl;
-
+template <std::invocable Func>
+BenchResult run_benchmark(Bodies &b, Func &&func) {
+    const auto init_nrj = b.get_system_energy();
     auto start = std::chrono::high_resolution_clock::now();
 
-    // compute for seq model
-    Bodies b(N);
-    const auto init_b_nrj = b.get_system_energy();
-    auto start_seq = std::chrono::high_resolution_clock::now();
-    run_seq<ForceModel, EulerExplicit>(b, DT, NB_ITER);
-    auto end_seq = std::chrono::high_resolution_clock::now();
-    const auto end_b_nrj = b.get_system_energy();
+    std::forward<Func>(func)();
 
-    // compute for omp model
-    Bodies b_omp(N);
-    const auto init_bomp_nrj = b.get_system_energy();
-    auto start_omp = std::chrono::high_resolution_clock::now();
-    run_omp<ForceModel, EulerExplicit>(b_omp, DT, NB_ITER);
-    auto end_omp = std::chrono::high_resolution_clock::now();
-    const auto end_bomp_nrj = b.get_system_energy();
-
-    // compute execution times
     auto end = std::chrono::high_resolution_clock::now();
+    const auto end_nrj = b.get_system_energy();
+
     auto duration =
         std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-    auto duration_seq = std::chrono::duration_cast<std::chrono::milliseconds>(
-        end_seq - start_seq);
-    auto duration_omp = std::chrono::duration_cast<std::chrono::milliseconds>(
-        end_omp - start_omp);
+    return {duration, end_nrj - init_nrj};
+}
 
-    // compute energy difference accros models
-    const auto nrj_diff_seq = end_b_nrj - init_b_nrj;
-    const auto nrj_diff_omp = end_bomp_nrj - init_bomp_nrj;
+int main(void) {
+    std::cout << "Running simulation on " << NB_ITER << " time iteration\n";
+    std::cout << "With " << N << " bodies\n";
 
-    // simple prompt
-    std::cout << "Execution Time: " << duration.count() << " ms" << std::endl;
-    std::cout << "SEQ Time: " << duration_seq.count() << " ms" << std::endl;
-    std::cout << "OMP Time: " << duration_omp.count() << " ms" << std::endl;
-    std::cout << "SEQ energy difference: " << nrj_diff_seq << " Joules"
-              << std::endl;
-    std::cout << "OMP energy difference: " << nrj_diff_omp << " Joules"
-              << std::endl;
+    auto start_total = std::chrono::high_resolution_clock::now();
+
+    Bodies b_seq(N);
+    auto res_seq = run_benchmark(b_seq, [&]() {
+        run_seq<ForceModel, EulerExplicit>(b_seq, DT, NB_ITER);
+    });
+
+    Bodies b_omp(N);
+    auto res_omp = run_benchmark(b_omp, [&]() {
+        run_omp<ForceModel, EulerExplicit>(b_omp, DT, NB_ITER);
+    });
+
+    auto end_total = std::chrono::high_resolution_clock::now();
+    auto total_duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+        end_total - start_total);
+
+    std::cout << "Total Execution Time: " << total_duration.count() << " ms\n";
+    std::cout << "SEQ/EX Time: " << res_seq.duration.count() << " ms\n";
+    std::cout << "OMP/EX Time: " << res_omp.duration.count() << " ms\n";
+    std::cout << "SEQ/EX energy difference: " << res_seq.energy_diff
+              << " Joules\n";
+    std::cout << "OMP/EX energy difference: " << res_omp.energy_diff
+              << " Joules\n";
 
     return 0;
 }
