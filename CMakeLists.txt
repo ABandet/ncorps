@@ -20,5 +20,8 @@ target_sources(nbody
       src/impl/force_model.hpp
 )
 
+find_package(OpenMP REQUIRED)
+target_link_libraries(nbody PRIVATE OpenMP::OpenMP_CXX)
+
 # find_package(Kokkos 4.7 REQUIRED CONFIG)
 # target_link_libraries(nbody PRIVATE Kokkos::kokkos)
