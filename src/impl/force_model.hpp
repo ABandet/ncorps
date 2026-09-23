@@ -1,9 +1,10 @@
-#ifndef FORCE_MODEL_H_
-#define FORCE_MODEL_H_
+#pragma once
 
 #include <cmath>
+#include <cstddef>
 
 #include "datatype/bodies.hpp"
+#include "datatype/forces.hpp"
 
 namespace ncorps {
 
@@ -11,35 +12,49 @@ class ForceModel {
   public:
     ForceModel() = delete;
 
-    static void step(Bodies &b, const size_t i, const double dt, double &fx,
-                     double &fy, double &fz) {
-        fx = 0;
-        fy = 0;
-        fz = 0;
+    static void step_all(const Bodies &b, Forces &f) {
+        const size_t n = b.m_n;
 
-        for (size_t j = 0; j < b.m_n; j++) {
-            if (i == j)
-                continue;
-            else {
-                auto dist_ij = compute_dist_ij(b, i, j);
-                double f = g_ * b.m_m[j] / (dist_ij * dist_ij * dist_ij);
-                fx += f * (b.m_rx[j] - b.m_rx[i]);
-                fy += f * (b.m_ry[j] - b.m_ry[i]);
-                fz += f * (b.m_rz[j] - b.m_rz[i]);
+        const double *__restrict rx = b.m_rx.data();
+        const double *__restrict ry = b.m_ry.data();
+        const double *__restrict rz = b.m_rz.data();
+        const double *__restrict m = b.m_m.data();
+
+        double *__restrict fx = f.m_fx.data();
+        double *__restrict fy = f.m_fy.data();
+        double *__restrict fz = f.m_fz.data();
+
+#pragma omp parallel for schedule(static)
+        for (size_t i = 0; i < n; ++i) {
+            const double xi = rx[i];
+            const double yi = ry[i];
+            const double zi = rz[i];
+            double ax = 0.0;
+            double ay = 0.0;
+            double az = 0.0;
+
+#pragma omp simd reduction(+ : ax, ay, az)
+            for (size_t j = 0; j < n; ++j) {
+                const double dx = rx[j] - xi;
+                const double dy = ry[j] - yi;
+                const double dz = rz[j] - zi;
+                const double d2 = dx * dx + dy * dy + dz * dz + eps2_;
+                const double inv_d = 1.0 / std::sqrt(d2);
+                const double s = g_ * m[j] * inv_d * inv_d * inv_d;
+                ax += s * dx;
+                ay += s * dy;
+                az += s * dz;
             }
+
+            fx[i] = ax;
+            fy[i] = ay;
+            fz[i] = az;
         }
     }
 
   private:
     static constexpr double g_ = 6.674e-11;
-
-    static double compute_dist_ij(const Bodies &b, const int i, const int j) {
-        double dist =
-            sqrt(pow(b.m_rx[j] - b.m_rx[i], 2) + pow(b.m_ry[j] - b.m_ry[i], 2) +
-                 pow(b.m_rz[j] - b.m_rz[i], 2));
-        return dist;
-    }
+    static constexpr double eps2_ = 1e-9;
 };
-} // namespace ncorps
 
-#endif // FORCE_MODEL_H_
+} // namespace ncorps

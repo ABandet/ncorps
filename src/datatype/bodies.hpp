@@ -2,7 +2,6 @@
 
 #include <cmath>
 #include <cstddef>
-#include <iostream>
 #include <random>
 #include <vector>
 
@@ -12,18 +11,9 @@ class Bodies {
   public:
     Bodies() = delete;
 
-    Bodies(const size_t n) {
-        this->m_n = n;
-
-        this->m_rx = std::vector<double>(n, 0);
-        this->m_ry = std::vector<double>(n, 0);
-        this->m_rz = std::vector<double>(n, 0);
-
-        this->m_vx = std::vector<double>(n, 0);
-        this->m_vy = std::vector<double>(n, 0);
-        this->m_vz = std::vector<double>(n, 0);
-
-        this->m_m = std::vector<double>(n, 1);
+    Bodies(const size_t n)
+        : m_n(n), m_rx(n, 0.0), m_ry(n, 0.0), m_rz(n, 0.0), m_vx(n, 0.0),
+          m_vy(n, 0.0), m_vz(n, 0.0), m_m(n, 1.0) {
 
         std::random_device rd;
         std::mt19937 gen(rd());

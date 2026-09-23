@@ -23,5 +23,7 @@ target_sources(nbody
 find_package(OpenMP REQUIRED)
 target_link_libraries(nbody PRIVATE OpenMP::OpenMP_CXX)
 
+target_include_directories(nbody PRIVATE external/MIPP/include)
+
 # find_package(Kokkos 4.7 REQUIRED CONFIG)
 # target_link_libraries(nbody PRIVATE Kokkos::kokkos)
