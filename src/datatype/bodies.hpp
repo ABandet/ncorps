@@ -1,5 +1,4 @@
-#ifndef BODIES_H_
-#define BODIES_H_
+#pragma once
 
 #include <cmath>
 #include <cstddef>
@@ -38,7 +37,7 @@ class Bodies {
 
     double get_body_energy(size_t i) const {
         const double speed = std::sqrt(
-            std::pow(m_vx[i], 2) * std::pow(m_vy[i], 2) * std::pow(m_vz[i], 2));
+            std::pow(m_vx[i], 2) + std::pow(m_vy[i], 2) + std::pow(m_vz[i], 2));
 
         const double energy = 0.5 * 1 * std::pow(speed, 2);
         return energy;
@@ -68,5 +67,3 @@ class Bodies {
 };
 
 } // namespace ncorps
-
-#endif // BODIES_H_
