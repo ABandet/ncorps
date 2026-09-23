@@ -25,5 +25,15 @@ target_link_libraries(nbody PRIVATE OpenMP::OpenMP_CXX)
 
 target_include_directories(nbody PRIVATE external/MIPP/include)
 
+option(NBODY_NATIVE "Optimize with march=native" ON)
+
+if(NBODY_NATIVE)
+    include(CheckCXXCompilerFlag)
+    check_cxx_compiler_flag(-march=native HAS_MARCH_NATIVE)
+    if(HAS_MARCH_NATIVE)
+        target_compile_options(nbody PRIVATE -march=native)
+    endif()
+endif()
+
 # find_package(Kokkos 4.7 REQUIRED CONFIG)
 # target_link_libraries(nbody PRIVATE Kokkos::kokkos)
