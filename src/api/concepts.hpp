@@ -9,12 +9,12 @@ namespace ncorps {
 
 template <typename T>
 concept ForceModelC = requires(const Bodies &b, Forces &f) {
-    { T::step_all(b, f) } -> std::same_as<void>;
+  { T::step_all(b, f) } -> std::same_as<void>;
 };
 
 template <typename T>
 concept TimeIntegrator = requires(Bodies &b, const Forces &f, double dt) {
-    { T::step_all(b, f, dt) } -> std::same_as<void>;
+  { T::step_all(b, f, dt) } -> std::same_as<void>;
 };
 
 } // namespace ncorps
