@@ -15,8 +15,8 @@ public:
       : m_n(n), m_rx(n, 0.0), m_ry(n, 0.0), m_rz(n, 0.0), m_vx(n, 0.0),
         m_vy(n, 0.0), m_vz(n, 0.0), m_m(n, 1.0) {
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    std::seed_seq seed{42};
+    std::mt19937 gen(seed);
     std::uniform_real_distribution<double> dis(1.0, 1000.0);
     for (size_t i = 0; i < m_n; i++) {
       m_rx[i] = dis(gen);
