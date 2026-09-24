@@ -1,12 +1,12 @@
+#include <charconv>
 #include <chrono>
 #include <concepts>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <utility>
-
 #include <omp.h>
+#include <utility>
 
 #include "api/concepts.hpp"
 #include "datatype/bodies.hpp"
@@ -35,15 +35,15 @@ struct BenchResult {
   double energy_diff;
 };
 
-template <std::invocable Func>
-BenchResult run_benchmark(Bodies &b, Func &&func) {
-  const auto init_nrj = b.get_system_energy();
+template <ForceModelC FM, std::invocable Func>
+BenchResult run_benchmark(Bodies &b, Func &&func, const double g) {
+  const auto init_nrj = FM::compute_system_nrj(b, g);
   auto start = std::chrono::high_resolution_clock::now();
 
   std::forward<Func>(func)();
 
   auto end = std::chrono::high_resolution_clock::now();
-  const auto end_nrj = b.get_system_energy();
+  const auto end_nrj = FM::compute_system_nrj(b, g);
 
   auto duration =
       std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -92,20 +92,22 @@ int main(int argc, char **argv) {
   omp_set_num_threads(1);
 
   Bodies b_seq_esi(n);
-  auto res_seq_esi = run_benchmark(b_seq_esi, [&]() {
-    run<ForceModel, EulerSemiImplicit>(b_seq_esi, DT, NB_ITER, g);
-  });
+  auto res_seq_esi = run_benchmark<ForceModel>(
+      b_seq_esi,
+      [&]() { run<ForceModel, EulerSemiImplicit>(b_seq_esi, DT, NB_ITER, g); },
+      g);
 
   Bodies b_seq(n);
-  auto res_seq = run_benchmark(
-      b_seq, [&]() { run<ForceModel, EulerExplicit>(b_seq, DT, NB_ITER, g); });
+  auto res_seq = run_benchmark<ForceModel>(
+      b_seq, [&]() { run<ForceModel, EulerExplicit>(b_seq, DT, NB_ITER, g); },
+      g);
 
   omp_set_num_threads(max_threads);
 
   Bodies b_omp(n);
-  auto res_omp = run_benchmark(b_omp, [&]() {
-    run<ForceModel, EulerSemiImplicit>(b_omp, DT, NB_ITER, g);
-  });
+  auto res_omp = run_benchmark<ForceModel>(
+      b_omp,
+      [&]() { run<ForceModel, EulerSemiImplicit>(b_omp, DT, NB_ITER, g); }, g);
 
   auto end_total = std::chrono::high_resolution_clock::now();
   auto total_duration = std::chrono::duration_cast<std::chrono::milliseconds>(

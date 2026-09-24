@@ -52,6 +52,29 @@ public:
     }
   }
 
+  static double compute_system_nrj(const Bodies &b, const double g) {
+    const size_t n = b.m_n;
+    double u = 0.0;
+    double k = 0.0;
+#pragma omp parallel for reduction(+ : u, k) schedule(dynamic, 16)
+    for (size_t i = 0; i < n; i++) {
+      // kinetic energy
+      const double v2 =
+          b.m_vx[i] * b.m_vx[i] + b.m_vy[i] * b.m_vy[i] + b.m_vz[i] * b.m_vz[i];
+      k += 0.5 * b.m_m[i] * v2;
+      // potential energy
+      for (size_t j = i + 1; j < n; j++) {
+        const double dx = b.m_rx[j] - b.m_rx[i];
+        const double dy = b.m_ry[j] - b.m_ry[i];
+        const double dz = b.m_rz[j] - b.m_rz[i];
+        u -= g * b.m_m[i] * b.m_m[j] /
+             std::sqrt(dx * dx + dy * dy + dz * dz + eps2_);
+      }
+    }
+
+    return u + k;
+  }
+
 private:
   static constexpr double eps2_ = 1e-9;
 };

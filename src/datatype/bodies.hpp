@@ -18,29 +18,13 @@ public:
     std::seed_seq seed{42};
     std::mt19937 gen(seed);
     std::uniform_real_distribution<double> dis(1.0, 1000.0);
+    std::uniform_real_distribution<double> dis_m(1.0, 10.0);
     for (size_t i = 0; i < m_n; i++) {
       m_rx[i] = dis(gen);
       m_ry[i] = dis(gen);
       m_rz[i] = dis(gen);
+      m_m[i] = dis_m(gen);
     }
-  }
-
-  double get_body_energy(size_t i) const {
-    const double speed = std::sqrt(std::pow(m_vx[i], 2) + std::pow(m_vy[i], 2) +
-                                   std::pow(m_vz[i], 2));
-
-    const double energy = 0.5 * 1 * std::pow(speed, 2);
-    return energy;
-  }
-
-  // compute sum of cinetic energies in the bodies collection
-  double get_system_energy() const {
-    double sys_energy = 0;
-    for (size_t i = 0; i < m_n; i++) {
-      sys_energy += get_body_energy(i);
-    }
-
-    return sys_energy;
   }
 
   size_t m_n{0};
