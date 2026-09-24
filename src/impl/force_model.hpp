@@ -12,7 +12,7 @@ class ForceModel {
 public:
   ForceModel() = delete;
 
-  static void step_all(const Bodies &b, Forces &f) {
+  static void step_all(const Bodies &b, Forces &f, const double g) {
     const size_t n = b.m_n;
 
     const double *__restrict rx = b.m_rx.data();
@@ -40,7 +40,7 @@ public:
         const double dz = rz[j] - zi;
         const double d2 = dx * dx + dy * dy + dz * dz + eps2_;
         const double inv_d = 1.0 / std::sqrt(d2);
-        const double s = g_ * m[j] * inv_d * inv_d * inv_d;
+        const double s = g * m[j] * inv_d * inv_d * inv_d;
         ax += s * dx;
         ay += s * dy;
         az += s * dz;
@@ -53,7 +53,6 @@ public:
   }
 
 private:
-  static constexpr double g_ = 6.674e-11;
   static constexpr double eps2_ = 1e-9;
 };
 

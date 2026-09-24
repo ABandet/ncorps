@@ -6,9 +6,9 @@ Principe : une version fonctionnelle d'abord, les performances ensuite. Aucune �
 
 ## Étape 0 — Rendre le projet vérifiable
 
-- [ ] Ajouter un paramètre `seed` au constructeur de `Bodies`
-- [ ] Lire N, le nombre de pas et G en ligne de commande
-- [ ] Passer à G = 1 par défaut
+- [x] Ajouter un paramètre `seed` au constructeur de `Bodies`
+- [x] Lire N, le nombre de pas et G en ligne de commande
+- [x] Passer à G = 1 par défaut
 - [ ] Corriger l'énergie cinétique pour utiliser `m_m[i]` au lieu de 1
 - [ ] Ajouter l'énergie potentielle adoucie : −G·mᵢ·mⱼ / √(r² + ε²)
 - [ ] Afficher la dérive de l'énergie totale (cinétique + potentielle)

@@ -8,8 +8,8 @@
 namespace ncorps {
 
 template <typename T>
-concept ForceModelC = requires(const Bodies &b, Forces &f) {
-  { T::step_all(b, f) } -> std::same_as<void>;
+concept ForceModelC = requires(const Bodies &b, Forces &f, const double g) {
+  { T::step_all(b, f, g) } -> std::same_as<void>;
 };
 
 template <typename T>
