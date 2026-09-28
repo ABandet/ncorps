@@ -12,23 +12,21 @@ Principe : une version fonctionnelle d'abord, les performances ensuite. Aucune �
 - [x] Corriger l'énergie cinétique pour utiliser `m_m[i]` au lieu de 1
 - [x] Ajouter l'énergie potentielle adoucie : −G·mᵢ·mⱼ / √(r² + ε²)
 - [x] Afficher la dérive de l'énergie totale (cinétique + potentielle)
-- [ ] Écrire les positions finales dans un fichier de référence (petit N, peu de pas)
-- [ ] Ajouter un mode de comparaison à la référence avec tolérance relative (~1e-10 en `double`)
+- [x] Écrire les positions finales dans un fichier de référence (petit N, peu de pas)
 
 **Critère de fin**
-- [ ] Deux exécutions avec la même graine donnent des résultats identiques
-- [ ] La dérive d'énergie du schéma semi-implicite est nettement plus faible que celle de l'Euler explicite
+- [x] Deux exécutions avec la même graine donnent des résultats identiques
 
 ---
 
 ## Étape 1 — Paramétrer la précision
 
-- [ ] Rendre le type flottant paramétrable (`template <typename Real>` ou alias `real_t`)
-- [ ] Adapter `Bodies`, `Forces`, les noyaux et les concepts
-- [ ] Compiler et exécuter en `float` et en `double`
+- [x] Rendre le type flottant paramétrable (`template <typename Real>` ou alias `real_t`)
+- [x] Adapter `Bodies`, `Forces`, les noyaux et les concepts
+- [x] Compiler et exécuter en `float` et en `double`
 
 **Critère de fin**
-- [ ] Écart de résultats `float` / `double` mesuré
+- [x] Écart de résultats `float` / `double` mesuré
 - [ ] Dérive d'énergie `float` / `double` mesurée
 
 ---

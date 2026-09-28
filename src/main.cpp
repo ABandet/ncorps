@@ -9,21 +9,25 @@
 #include <utility>
 
 #include "api/concepts.hpp"
+#include "api/real.hpp"
 #include "datatype/bodies.hpp"
 #include "datatype/forces.hpp"
 #include "impl/force_model.hpp"
 #include "impl/time_integration.hpp"
 
-constexpr double DT = 0.001;
+using real_t = double;
+
+constexpr real_t DT = 0.001;
 constexpr size_t N = 1000;
 constexpr int NB_ITER = 100;
-constexpr double G = 1;
+constexpr real_t G = 1;
 
 using namespace ncorps;
 
-template <ForceModelC FM, TimeIntegrator TI>
-void run(Bodies &b, const double dt, const int nb_iter, const double g) {
-  Forces f(b.m_n);
+template <typename FM, typename TI, SupportedReal Real>
+  requires ForceModelC<FM, Real> && TimeIntegrator<TI, Real>
+void run(Bodies<Real> &b, const Real dt, const int nb_iter, const Real g) {
+  Forces<Real> f(b.m_n);
   for (int t = 0; t < nb_iter; t++) {
     FM::step_all(b, f, g);
     TI::step_all(b, f, dt);
@@ -35,8 +39,9 @@ struct BenchResult {
   double energy_diff;
 };
 
-template <ForceModelC FM, std::invocable Func>
-BenchResult run_benchmark(Bodies &b, Func &&func, const double g) {
+template <typename FM, std::invocable Func, SupportedReal Real>
+  requires ForceModelC<FM, Real>
+BenchResult run_benchmark(Bodies<Real> &b, Func &&func, const Real g) {
   const auto init_nrj = FM::compute_system_nrj(b, g);
   auto start = std::chrono::high_resolution_clock::now();
 
@@ -71,7 +76,7 @@ int main(int argc, char **argv) {
   }
 
   std::size_t n{N};
-  double g{G};
+  real_t g{G};
 
   if (argc > 1) {
     const char *end = argv[1] + std::strlen(argv[1]);
@@ -90,7 +95,7 @@ int main(int argc, char **argv) {
   const int max_threads = omp_get_max_threads();
   omp_set_num_threads(max_threads);
 
-  Bodies b_omp(n);
+  Bodies<real_t> b_omp(n);
   auto res_omp = run_benchmark<ForceModel>(
       b_omp,
       [&]() { run<ForceModel, EulerSemiImplicit>(b_omp, DT, NB_ITER, g); }, g);

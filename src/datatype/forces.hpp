@@ -3,16 +3,18 @@
 #include <cstddef>
 #include <vector>
 
+#include "api/real.hpp"
+
 namespace ncorps {
 
-struct Forces {
+template <SupportedReal Real> struct Forces {
   explicit Forces(const size_t n)
       : m_n(n), m_fx(n, 0.0), m_fy(n, 0.0), m_fz(n, 0.0) {}
 
   size_t m_n{0};
-  std::vector<double> m_fx{};
-  std::vector<double> m_fy{};
-  std::vector<double> m_fz{};
+  std::vector<Real> m_fx{};
+  std::vector<Real> m_fy{};
+  std::vector<Real> m_fz{};
 };
 
 } // namespace ncorps

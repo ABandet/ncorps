@@ -9,9 +9,11 @@
 #include <string>
 #include <vector>
 
+#include "api/real.hpp"
+
 namespace ncorps {
 
-class Bodies {
+template <SupportedReal Real> class Bodies {
 public:
   Bodies() = delete;
 
@@ -20,8 +22,8 @@ public:
         m_vy(n, 0.0), m_vz(n, 0.0), m_m(n, 1.0) {
 
     std::mt19937 gen(seed);
-    std::uniform_real_distribution<double> dis(1.0, 1000.0);
-    std::uniform_real_distribution<double> dis_m(1.0, 10.0);
+    std::uniform_real_distribution<Real> dis(1.0, 1000.0);
+    std::uniform_real_distribution<Real> dis_m(1.0, 10.0);
     for (size_t i = 0; i < m_n; i++) {
       m_rx[i] = dis(gen);
       m_ry[i] = dis(gen);
@@ -36,7 +38,7 @@ public:
       throw std::runtime_error("Impossible d'ouvrir le fichier : " + filename);
     }
 
-    file << std::setprecision(std::numeric_limits<double>::max_digits10);
+    file << std::setprecision(std::numeric_limits<Real>::max_digits10);
     file << m_n << std::endl;
     for (size_t i = 0; i < m_n; i++) {
       file << m_rx[i] << " ";
@@ -47,15 +49,15 @@ public:
 
   size_t m_n{0};
   // position
-  std::vector<double> m_rx{};
-  std::vector<double> m_ry{};
-  std::vector<double> m_rz{};
+  std::vector<Real> m_rx{};
+  std::vector<Real> m_ry{};
+  std::vector<Real> m_rz{};
   // speed
-  std::vector<double> m_vx{};
-  std::vector<double> m_vy{};
-  std::vector<double> m_vz{};
+  std::vector<Real> m_vx{};
+  std::vector<Real> m_vy{};
+  std::vector<Real> m_vz{};
   // mass
-  std::vector<double> m_m{};
+  std::vector<Real> m_m{};
 };
 
 } // namespace ncorps

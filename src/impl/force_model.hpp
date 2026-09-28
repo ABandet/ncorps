@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstddef>
 
+#include "api/real.hpp"
 #include "datatype/bodies.hpp"
 #include "datatype/forces.hpp"
 
@@ -12,35 +13,37 @@ class ForceModel {
 public:
   ForceModel() = delete;
 
-  static void step_all(const Bodies &b, Forces &f, const double g) {
+  template <SupportedReal Real>
+  static void step_all(const Bodies<Real> &b, Forces<Real> &f, const Real g) {
     const size_t n = b.m_n;
+    const Real eps2 = static_cast<Real>(eps2_);
 
-    const double *__restrict rx = b.m_rx.data();
-    const double *__restrict ry = b.m_ry.data();
-    const double *__restrict rz = b.m_rz.data();
-    const double *__restrict m = b.m_m.data();
+    const Real *__restrict rx = b.m_rx.data();
+    const Real *__restrict ry = b.m_ry.data();
+    const Real *__restrict rz = b.m_rz.data();
+    const Real *__restrict m = b.m_m.data();
 
-    double *__restrict fx = f.m_fx.data();
-    double *__restrict fy = f.m_fy.data();
-    double *__restrict fz = f.m_fz.data();
+    Real *__restrict fx = f.m_fx.data();
+    Real *__restrict fy = f.m_fy.data();
+    Real *__restrict fz = f.m_fz.data();
 
 #pragma omp parallel for schedule(static)
     for (size_t i = 0; i < n; ++i) {
-      const double xi = rx[i];
-      const double yi = ry[i];
-      const double zi = rz[i];
-      double ax = 0.0;
-      double ay = 0.0;
-      double az = 0.0;
+      const Real xi = rx[i];
+      const Real yi = ry[i];
+      const Real zi = rz[i];
+      Real ax = 0.0;
+      Real ay = 0.0;
+      Real az = 0.0;
 
 #pragma omp simd reduction(+ : ax, ay, az)
       for (size_t j = 0; j < n; ++j) {
-        const double dx = rx[j] - xi;
-        const double dy = ry[j] - yi;
-        const double dz = rz[j] - zi;
-        const double d2 = dx * dx + dy * dy + dz * dz + eps2_;
-        const double inv_d = 1.0 / std::sqrt(d2);
-        const double s = g * m[j] * inv_d * inv_d * inv_d;
+        const Real dx = rx[j] - xi;
+        const Real dy = ry[j] - yi;
+        const Real dz = rz[j] - zi;
+        const Real d2 = dx * dx + dy * dy + dz * dz + eps2;
+        const Real inv_d = Real(1) / std::sqrt(d2);
+        const Real s = g * m[j] * inv_d * inv_d * inv_d;
         ax += s * dx;
         ay += s * dy;
         az += s * dz;
@@ -52,23 +55,25 @@ public:
     }
   }
 
-  static double compute_system_nrj(const Bodies &b, const double g) {
+  template <SupportedReal Real>
+  static Real compute_system_nrj(const Bodies<Real> &b, const Real g) {
     const size_t n = b.m_n;
-    double u = 0.0;
-    double k = 0.0;
+    const Real eps2 = static_cast<Real>(eps2_);
+    Real u = 0.0;
+    Real k = 0.0;
 #pragma omp parallel for reduction(+ : u, k) schedule(dynamic, 16)
     for (size_t i = 0; i < n; i++) {
       // kinetic energy
-      const double v2 =
+      const Real v2 =
           b.m_vx[i] * b.m_vx[i] + b.m_vy[i] * b.m_vy[i] + b.m_vz[i] * b.m_vz[i];
       k += 0.5 * b.m_m[i] * v2;
       // potential energy
       for (size_t j = i + 1; j < n; j++) {
-        const double dx = b.m_rx[j] - b.m_rx[i];
-        const double dy = b.m_ry[j] - b.m_ry[i];
-        const double dz = b.m_rz[j] - b.m_rz[i];
+        const Real dx = b.m_rx[j] - b.m_rx[i];
+        const Real dy = b.m_ry[j] - b.m_ry[i];
+        const Real dz = b.m_rz[j] - b.m_rz[i];
         u -= g * b.m_m[i] * b.m_m[j] /
-             std::sqrt(dx * dx + dy * dy + dz * dz + eps2_);
+             std::sqrt(dx * dx + dy * dy + dz * dz + eps2);
       }
     }
 
