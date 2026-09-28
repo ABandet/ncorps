@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cstddef>
+#include <fstream>
 #include <random>
 #include <vector>
 
@@ -25,6 +26,18 @@ public:
       m_rz[i] = dis(gen);
       m_m[i] = dis_m(gen);
     }
+  }
+
+  void write_to_file(const std::string filename) {
+    std::ofstream file;
+    file.open(filename);
+    file << m_n << std::endl;
+    for (auto i = 0; i < m_n; i++) {
+      file << m_rx[i] << " ";
+      file << m_ry[i] << " ";
+      file << m_rz[i] << std::endl;
+    }
+    file.close();
   }
 
   size_t m_n{0};

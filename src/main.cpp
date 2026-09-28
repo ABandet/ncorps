@@ -88,40 +88,21 @@ int main(int argc, char **argv) {
 
   auto start_total = std::chrono::high_resolution_clock::now();
   const int max_threads = omp_get_max_threads();
-
-  omp_set_num_threads(1);
-
-  Bodies b_seq_esi(n);
-  auto res_seq_esi = run_benchmark<ForceModel>(
-      b_seq_esi,
-      [&]() { run<ForceModel, EulerSemiImplicit>(b_seq_esi, DT, NB_ITER, g); },
-      g);
-
-  Bodies b_seq(n);
-  auto res_seq = run_benchmark<ForceModel>(
-      b_seq, [&]() { run<ForceModel, EulerExplicit>(b_seq, DT, NB_ITER, g); },
-      g);
-
   omp_set_num_threads(max_threads);
 
   Bodies b_omp(n);
   auto res_omp = run_benchmark<ForceModel>(
       b_omp,
       [&]() { run<ForceModel, EulerSemiImplicit>(b_omp, DT, NB_ITER, g); }, g);
+  b_omp.write_to_file("b_omp.data");
 
   auto end_total = std::chrono::high_resolution_clock::now();
   auto total_duration = std::chrono::duration_cast<std::chrono::milliseconds>(
       end_total - start_total);
 
   std::cout << "Total Execution Time: " << total_duration.count() << " ms\n";
-  std::cout << "SEQ/EX  Time: " << res_seq.duration.count() << " ms\n";
-  std::cout << "SEQ/ESI Time: " << res_seq_esi.duration.count() << " ms\n";
   std::cout << "OMP/ESI Time: " << res_omp.duration.count() << " ms ("
             << max_threads << " threads)\n";
-  std::cout << "SEQ/EX energy difference: " << res_seq.energy_diff
-            << " Joules\n";
-  std::cout << "SEQ/ESI energy difference: " << res_seq_esi.energy_diff
-            << " Joules\n";
   std::cout << "OMP/ESI energy difference: " << res_omp.energy_diff
             << " Joules\n";
 

@@ -9,9 +9,9 @@ Principe : une version fonctionnelle d'abord, les performances ensuite. Aucune �
 - [x] Ajouter un paramètre `seed` au constructeur de `Bodies`
 - [x] Lire N, le nombre de pas et G en ligne de commande
 - [x] Passer à G = 1 par défaut
-- [ ] Corriger l'énergie cinétique pour utiliser `m_m[i]` au lieu de 1
-- [ ] Ajouter l'énergie potentielle adoucie : −G·mᵢ·mⱼ / √(r² + ε²)
-- [ ] Afficher la dérive de l'énergie totale (cinétique + potentielle)
+- [x] Corriger l'énergie cinétique pour utiliser `m_m[i]` au lieu de 1
+- [x] Ajouter l'énergie potentielle adoucie : −G·mᵢ·mⱼ / √(r² + ε²)
+- [x] Afficher la dérive de l'énergie totale (cinétique + potentielle)
 - [ ] Écrire les positions finales dans un fichier de référence (petit N, peu de pas)
 - [ ] Ajouter un mode de comparaison à la référence avec tolérance relative (~1e-10 en `double`)
 
